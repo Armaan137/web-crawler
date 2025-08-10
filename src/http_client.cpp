@@ -5,14 +5,14 @@ size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata) 
     
     const size_t totalSize = size * nmemb;
     auto* response = static_cast<std::string*>(userdata);
-    response->append(contents, totalSize)
+    response->append(contents, totalSize);
 
     return totalSize;
 }
 
 // Performs an HTTP GET request.
 bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
-    static bool = initialized = curl_global_init(CURL_GLOBAL_DEFAULT);
+    static bool initialized = (curl_global_init(CURL_GLOBAL_DEFAULT) == 0);
 
     if (!initialized) {
         std::cout << "Global initializing failed.";
@@ -59,7 +59,7 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     curl_easy_getinfo(curl.get(), CURLINFO_EFFECTIVE_URL, &eff);
 
     output.status = status;
-    output.effective_url = eff ? std::string(eff) : url;
+    output.url = eff ? std::string(eff) : url;
     output.body = std::move(body);
     return true;
 }

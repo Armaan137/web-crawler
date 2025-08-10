@@ -2,6 +2,7 @@
 #define HTTP_HPP
 
 #include <string>
+#include <iostream>
 #include <curl/curl.h>
 #include <memory>
 
