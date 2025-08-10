@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_executable(crawler
     src/main.cpp
+    src/http_client.cpp
 )
 
 target_include_directories(crawler
