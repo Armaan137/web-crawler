@@ -12,7 +12,7 @@ size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata) 
 
 // Performs an HTTP GET request.
 bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
-    static bool initialized = (curl_global_init(CURL_GLOBAL_DEFAULT) == 0);
+    static bool initialized = (curl_global_init(CURL_GLOBAL_DEFAULT) == CURLE_OK);
 
     if (!initialized) {
         std::cout << "Global initializing failed.";
