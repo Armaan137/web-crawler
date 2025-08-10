@@ -15,4 +15,6 @@ target_include_directories(crawler
     PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/include
 )
 
-target_link_directories(crawlerCURL::libcurl)
+target_link_libraries(crawler 
+    PRIVATE CURL::libcurl
+)
