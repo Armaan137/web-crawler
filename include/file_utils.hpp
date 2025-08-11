@@ -3,7 +3,7 @@
 
 #include <iostream>
 #include <fstream>
-#include "http.hpp"
+#include "http_client.hpp"
 
 bool saveToFile(const HttpResult& output);
 

@@ -3,7 +3,7 @@
 
 #include <string>
 #include <regex>
-#include <http.hpp>
+#include <http_client.hpp>
 
 std::string extractTitle(const std::string& html);
 
