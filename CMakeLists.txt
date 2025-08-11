@@ -10,6 +10,7 @@ add_executable(crawler
     src/main.cpp
     src/http_client.cpp
     src/file_utils.cpp
+    src/parse.cpp
 )
 
 target_include_directories(crawler
