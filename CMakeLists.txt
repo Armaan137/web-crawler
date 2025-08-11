@@ -9,6 +9,7 @@ find_package(CURL REQUIRED)
 add_executable(crawler
     src/main.cpp
     src/http_client.cpp
+    src/file_utils.cpp
 )
 
 target_include_directories(crawler
