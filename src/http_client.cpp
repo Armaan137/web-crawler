@@ -15,7 +15,7 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     static bool initialized = (curl_global_init(CURL_GLOBAL_DEFAULT) == CURLE_OK);
 
     if (!initialized) {
-        std::cout << "Global initializing failed.";
+        std::cerr << "Global initializing failed." << "\n";
         return false;
     }
 
@@ -23,7 +23,7 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     std::unique_ptr<CURL, CurlHandleDeleter> curl(curl_easy_init());
 
     if (!curl) {
-        std::cout << "Easy initializing failed.";
+        std::cerr << "Easy initializing failed." << "\n";
         return false;
     }
 
