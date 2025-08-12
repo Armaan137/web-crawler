@@ -18,7 +18,7 @@ target_include_directories(crawler
 )
 
 target_link_libraries(crawler 
-    PRIVATE C
-        URL::libcurl
+    PRIVATE 
+        CURL::libcurl
         lexbor
 )
