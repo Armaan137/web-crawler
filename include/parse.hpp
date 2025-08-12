@@ -3,8 +3,12 @@
 
 #include <string>
 #include <regex>
-#include <http_client.hpp>
+#include <vector>
+#include "http_client.hpp"
+#include <lexbor/dom/dom.h>
+#include <lexbor/html/html.h>
 
 std::string extractTitle(const std::string& html);
+std::vector<std::string> extractLinks(const std::string& html);
 
 #endif
