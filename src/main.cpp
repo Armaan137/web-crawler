@@ -14,11 +14,17 @@ int main() {
     std::string url = "https://example.com";
 
     if (getHttp(url, result, error)) {
+        std::vector headers = result.headers;
+        for (const auto& element : headers) {
+            std::cout << element;
+        }
         std::cout << "Status: " << result.status << "\n";
         std::cout << "Final URL: " << result.url << "\n";
-        if (!saveToFile(result)) return 1;
+        // if (!saveToFile(result)) return 1;
         std::string title = extractTitle(result.body);
         std::cout << "Extracted title: " << title << "\n";
+        std::string body = result.body;
+        std::cout << "Body:" << body << "\n";     
     } else {
         std::cerr << "Request failed: " << error << "\n";
         curl_global_cleanup();
