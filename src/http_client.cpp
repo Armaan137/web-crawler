@@ -26,6 +26,7 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     const char* userAgent = "CrawlerWIP (+https://example.local)";
 
     curl_easy_setopt(curl.get(), CURLOPT_ERRORBUFFER, errbuf);
+    curl_easy_setopt(curl.get(), CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl.get(), CURLOPT_ACCEPT_ENCODING, "");
     curl_easy_setopt(curl.get(), CURLOPT_URL, url.c_str());
     curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
@@ -41,7 +42,12 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
 
     CURLcode rc = curl_easy_perform(curl.get());
     if (rc != CURLE_OK) {
-        error = curl_easy_strerror(rc);
+        if (errbuf[0] != '\0') {
+            error = std::string(curl_easy_strerror(rc)) + ": " + errbuf;
+        } else {
+            error = curl_easy_strerror(rc);
+        }
+
         return false;
     }
 
