@@ -12,6 +12,7 @@ static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* use
     return totalSize;
 }
 
+// Helper to check if a header already exists.
 static bool isStatusLine(std::string_view line) {
     return line.rfind("HTTP/", 0) == 0;
 }
@@ -60,7 +61,6 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &output);
     curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 20L);        
     curl_easy_setopt(curl.get(), CURLOPT_CONNECTTIMEOUT, 10L);
-
     curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYPEER, 1L);
     curl_easy_setopt(curl.get(), CURLOPT_SSL_VERIFYHOST, 2L);
 
