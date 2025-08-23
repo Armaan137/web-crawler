@@ -2,11 +2,9 @@
 #define HTTP_HPP
 
 #include <string>
-#include <iostream>
 #include <curl/curl.h>
 #include <memory>
 #include <vector>
-#include <string_view>
 
 struct HttpResult {
     long status = 0;
