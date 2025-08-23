@@ -1,7 +1,7 @@
 #include "http_client.hpp"
 
 // Write callback to collect the response chunks into a string.
-size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata) {
+static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata) {
     
     const size_t totalSize = size * nmemb;
     auto* response = static_cast<std::string*>(userdata);
@@ -61,5 +61,6 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     output.status = status;
     output.url = eff ? std::string(eff) : url;
     output.body = std::move(body);
+
     return true;
 }

@@ -25,7 +25,6 @@ struct SlistDeleter {
     }
 };
 
-static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata);
 bool getHttp(const std::string& url, HttpResult& output, std::string& error);
 
 #endif
