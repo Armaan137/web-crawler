@@ -2,16 +2,29 @@
 
 // Write callback to collect the response chunks into a string.
 static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata) {
-    
     const size_t totalSize = size * nmemb;
-    auto* response = static_cast<std::string*>(userdata);
-    response->append(contents, totalSize);
+    auto* out = static_cast<HttpResult*>(userdata);
+    out->body.append(contents, totalSize);
+
+    return totalSize;
+}
+
+// Write callback to collect the header into a vector.
+static size_t headerCallback(char* contents, size_t size, size_t nmemb, void* userdata) {
+    const size_t totalSize = size * nmemb;
+    auto* out = static_cast<HttpResult*>(userdata);
+    out->headers.emplace_back(contents, totalSize);
 
     return totalSize;
 }
 
 // Performs an HTTP GET request.
 bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
+    output.status = 0;
+    output.url.clear();
+    output.body.clear();
+    output.headers.clear();
+
     // Ensures that curl_easy_cleanup() runs automatically on scope exit.
     std::unique_ptr<CURL, CurlHandleDeleter> curl(curl_easy_init());
 
@@ -20,7 +33,6 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
         return false;
     }
 
-    std::string body;
     char errbuf[CURL_ERROR_SIZE] = {};
 
     const char* userAgent = "CrawlerWIP (+https://example.local)";
@@ -32,8 +44,10 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
     curl_easy_setopt(curl.get(), CURLOPT_FOLLOWLOCATION, 1L);
     curl_easy_setopt(curl.get(), CURLOPT_MAXREDIRS, 5L);
     curl_easy_setopt(curl.get(), CURLOPT_USERAGENT, userAgent);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERFUNCTION, headerCallback);
+    curl_easy_setopt(curl.get(), CURLOPT_HEADERDATA, &output);
     curl_easy_setopt(curl.get(), CURLOPT_WRITEFUNCTION, writeCallback);
-    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &body);
+    curl_easy_setopt(curl.get(), CURLOPT_WRITEDATA, &output);
     curl_easy_setopt(curl.get(), CURLOPT_TIMEOUT, 20L);        
     curl_easy_setopt(curl.get(), CURLOPT_CONNECTTIMEOUT, 10L);
 
@@ -59,7 +73,6 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
 
     output.status = status;
     output.url = eff ? std::string(eff) : url;
-    output.body = std::move(body);
 
     return true;
 }
