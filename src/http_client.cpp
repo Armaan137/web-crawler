@@ -12,7 +12,7 @@ static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* use
     return totalSize;
 }
 
-bool isStatusLine(std::string_view line) {
+static bool isStatusLine(std::string_view line) {
     return line.rfind("HTTP/", 0) == 0;
 }
 
