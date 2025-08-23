@@ -12,13 +12,6 @@ static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* use
 
 // Performs an HTTP GET request.
 bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
-    static bool initialized = (curl_global_init(CURL_GLOBAL_DEFAULT) == CURLE_OK);
-
-    if (!initialized) {
-        std::cerr << "Global initializing failed." << "\n";
-        return false;
-    }
-
     // Ensures that curl_easy_cleanup() runs automatically on scope exit.
     std::unique_ptr<CURL, CurlHandleDeleter> curl(curl_easy_init());
 

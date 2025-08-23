@@ -4,9 +4,13 @@
 #include "parse.hpp"
 
 int main() {
+    if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
+        std::cerr << "Global initializing failed." << "\n";
+        return 1;
+    }
+
     HttpResult result;
     std::string error;
-
     std::string url = "https://example.com";
 
     if (getHttp(url, result, error)) {
@@ -17,8 +21,11 @@ int main() {
         std::cout << "Extracted title: " << title << "\n";
     } else {
         std::cerr << "Request failed: " << error << "\n";
+        curl_global_cleanup();
         return 1;
     }
+
+    curl_global_cleanup();
 
     return 0;
 }
