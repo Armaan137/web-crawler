@@ -3,7 +3,6 @@
 
 #include <string>
 #include <curl/curl.h>
-#include <memory>
 #include <vector>
 
 struct HttpResult {

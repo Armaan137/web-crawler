@@ -1,5 +1,8 @@
 #include "parse.hpp"
+
 #include <iostream>
+#include <lexbor/dom/dom.h>
+#include <lexbor/html/html.h>
 
 // This will eventually parse the HTML fully.
 std::string extractTitle(const std::string& html) {

@@ -1,5 +1,8 @@
 #include "file_utils.hpp"
 
+#include <iostream>
+#include <fstream>
+
 // Saves results to a file in the root of the project directory.
 bool saveToFile(const HttpResult& output) {
     const char* path = "../page.html";
