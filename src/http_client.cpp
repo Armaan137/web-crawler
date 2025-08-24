@@ -30,7 +30,7 @@ static size_t headerCallback(char* contents, size_t size, size_t nmemb, void* us
 }
 
 // Builds the URL to get robots.txt by parsing the original URL.
-std::optional<std::string> buildRobotsUrl(const std::string&url) {
+static std::optional<std::string> buildRobotsUrl(const std::string&url) {
     CURLU* handle = curl_url();
 
     if (!handle) return std::nullopt;
@@ -56,6 +56,24 @@ std::optional<std::string> buildRobotsUrl(const std::string&url) {
 
     return out;
 
+}
+
+// Uses getHttp to get the robot.txt if there is one.
+bool getRobots(std::string& url, HttpResult& output, std::string& error) {
+    auto robotsUrl = buildRobotsUrl(url);
+    if (!robotsUrl) {
+        error = "Failed to construct URL for robots.txt.";
+        return false;
+    }
+
+    if (!getHttp(*robotsUrl, output, error)) return false;
+
+    // Act as if there is no robots.txt if we get a non 2XX status code.
+    if (!(output.status >= 200 && output.status < 300)) {
+        return false;
+    }
+
+    return true;
 }
 
 // Performs an HTTP GET request.
