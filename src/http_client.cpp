@@ -2,6 +2,7 @@
 
 #include <string_view>
 #include <iostream>
+#include <optional>
 
 // Write callback to collect the response chunks into a string.
 static size_t writeCallback(char* contents, size_t size, size_t nmemb, void* userdata) {
@@ -26,6 +27,35 @@ static size_t headerCallback(char* contents, size_t size, size_t nmemb, void* us
     out->headers.emplace_back(std::move(line));
 
     return totalSize;
+}
+
+// Builds the URL to get robots.txt by parsing the original URL.
+std::optional<std::string> buildRobotsUrl(const std::string&url) {
+    CURLU* handle = curl_url();
+
+    if (!handle) return std::nullopt;
+
+    std::optional<std::string> out;
+
+    // Strips the URL of it's path, query, and fragment, so it's just scheme + host + '/robots.txt'.
+    if (curl_url_set(handle, CURLUPART_URL, url.c_str(), 0L) == CURLUE_OK) {
+        curl_url_set(handle, CURLUPART_PATH, "", 0L);
+        curl_url_set(handle, CURLUPART_QUERY, NULL, 0L);
+        curl_url_set(handle, CURLUPART_FRAGMENT, NULL, 0L);
+        curl_url_set(handle, CURLUPART_PATH, "/robots.txt", 0L);      
+        
+        // Build the URL.
+        char* fullUrl = nullptr;
+        if (curl_url_get(handle, CURLUPART_URL, &fullUrl, 0L) == CURLUE_OK) {
+            out = std::string(fullUrl);
+            curl_free(fullUrl);
+        }
+    }
+
+    curl_url_cleanup(handle);
+
+    return out;
+
 }
 
 // Performs an HTTP GET request.
