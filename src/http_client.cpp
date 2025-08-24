@@ -32,7 +32,7 @@ static size_t headerCallback(char* contents, size_t size, size_t nmemb, void* us
 
 // Builds the URL to get robots.txt by parsing the original URL.
 static std::optional<std::string> buildRobotsUrl(const std::string&url) {
-    CURLU* handle = curl_url();
+    CURLU* handle {curl_url()};
 
     if (!handle) return std::nullopt;
 
@@ -46,7 +46,7 @@ static std::optional<std::string> buildRobotsUrl(const std::string&url) {
         curl_url_set(handle, CURLUPART_PATH, "/robots.txt", 0L);      
         
         // Build the URL.
-        char* fullUrl = nullptr;
+        char* fullUrl {nullptr};
         if (curl_url_get(handle, CURLUPART_URL, &fullUrl, 0L) == CURLUE_OK) {
             out = std::string(fullUrl);
             curl_free(fullUrl);
@@ -61,7 +61,7 @@ static std::optional<std::string> buildRobotsUrl(const std::string&url) {
 
 // Uses getHttp to get the robot.txt if there is one.
 bool getRobots(std::string& url, HttpResult& output, std::string& error) {
-    auto robotsUrl = buildRobotsUrl(url);
+    auto robotsUrl {buildRobotsUrl(url)};
     if (!robotsUrl) {
         error = "Failed to construct URL for robots.txt.";
         return false;
@@ -95,7 +95,7 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
 
     char errbuf[CURL_ERROR_SIZE] = {};
 
-    const char* userAgent = "CrawlerWIP (+https://example.local)";
+    const char* userAgent {"CrawlerWIP (+https://example.local)"};
 
     curl_easy_setopt(curl.get(), CURLOPT_ERRORBUFFER, errbuf);
     curl_easy_setopt(curl.get(), CURLOPT_NOSIGNAL, 1L);
@@ -124,10 +124,10 @@ bool getHttp(const std::string& url, HttpResult& output, std::string& error) {
         return false;
     }
 
-    long status = 0;
+    long status {0};
     curl_easy_getinfo(curl.get(), CURLINFO_RESPONSE_CODE, &status);
 
-    char* eff = nullptr;
+    char* eff {nullptr};
     curl_easy_getinfo(curl.get(), CURLINFO_EFFECTIVE_URL, &eff);
 
     output.status = status;

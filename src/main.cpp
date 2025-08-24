@@ -11,7 +11,7 @@ int main() {
 
     HttpResult result;
     std::string error;
-    std::string url = "https://example.com";
+    std::string url {"https://example.com"};
 
     if (getHttp(url, result, error)) {
         std::vector headers = result.headers;

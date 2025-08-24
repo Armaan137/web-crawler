@@ -5,7 +5,7 @@
 
 // Saves results to a file in the root of the project directory.
 bool saveToFile(const HttpResult& output) {
-    const char* path = "../page.html";
+    const char* path {"../page.html"};
     std::ofstream outputFile(path, std::ios::binary);
 
     if (!outputFile.is_open()) {
