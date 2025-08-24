@@ -2,7 +2,6 @@
 #define PARSE_H
 
 #include <string>
-#include <regex>
 #include <vector>
 #include "http_client.hpp"
 #include <lexbor/dom/dom.h>

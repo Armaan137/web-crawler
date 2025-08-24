@@ -1,4 +1,5 @@
 #include "parse.hpp"
+#include <iostream>
 
 // This will eventually parse the HTML fully.
 std::string extractTitle(const std::string& html) {
