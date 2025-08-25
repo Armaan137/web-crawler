@@ -14,7 +14,7 @@ std::string extractTitle(const std::string& html) {
     size_t end = html.find(closingTag);
 
     if (start == std::string::npos || end == std::string::npos) {
-        std::cerr << "Could not find a title." << "\n";
+        std::cerr << "Could not find a title.\n";
         return "";
     }
 
@@ -30,14 +30,17 @@ std::vector<std::string> extractLinks(const std::string& html) {
     lxb_html_document_t *document;
     lxb_dom_collection_t *collection;
 
+    // Lexbor does not rely on a null terminator. It treats HTML as a raw buffer of bytes.
+    size_t htmlLength = html.size(); 
     document = lxb_html_document_create();
+
     if (document == nullptr) {
-        std::cerr << "Failed to create HTML Document" << "\n";
+        std::cerr << "Failed to create HTML Document.\n";
     }
 
-    status = lxb_html_document_parse(document, (const lxb_char_t *)html.c_str(), sizeof(html) - 1);
+    status = lxb_html_document_parse(document, (const lxb_char_t *)html.c_str(), htmlLength);
     if (status != LXB_STATUS_OK) {
-        std::cerr << "Failed to parse HTML." << "\n";
+        std::cerr << "Failed to parse HTML.\n";
     }
 
     lxb_dom_element_t *title_el = lxb_dom_interface_element(lxb_html_document_head_element(document));
