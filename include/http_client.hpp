@@ -7,9 +7,9 @@
 
 struct HttpResult {
     long status = 0;
-    std::string url;
-    std::string body;
-    std::vector<std::string> headers;
+    std::string url {};
+    std::string body {};
+    std::vector<std::string> headers {};
 };
 
 // RAII deleters.
@@ -26,5 +26,6 @@ struct SlistDeleter {
 };
 
 bool getHttp(const std::string& url, HttpResult& output, std::string& error);
+bool getRobots(std::string& url, HttpResult& output, std::string& error);
 
 #endif
