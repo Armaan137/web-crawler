@@ -3,7 +3,30 @@
 #include "file_utils.hpp"
 #include "parse.hpp"
 
-int main() {
+#include <string>
+#include <curl/curl.h>
+
+// Checks if the URL is valid.
+static bool isValidUrl (const std::string& url) {
+    CURLU* handle = curl_url();
+    CURLUcode rc = curl_url_set(handle, CURLUPART_URL, url.c_str(), 0);
+    curl_url_cleanup(handle);
+    return rc == CURLUE_OK;
+}
+
+int main(int argc, char* argv[]) {
+    if (argc != 2) {
+        std::cerr << "Must pass in one URL.\n";
+        return 1;
+    }
+
+    std::string url {argv[0]};
+
+    if (!isValidUrl(url)) {
+        std::cerr << "URL is invalid.\n";
+        return 1;
+    }
+
     if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
         std::cerr << "Global initializing failed." << "\n";
         return 1;
@@ -11,7 +34,6 @@ int main() {
 
     HttpResult result;
     std::string error;
-    std::string url {"https://example.com"};
 
     if (getHttp(url, result, error)) {
         std::vector headers = result.headers;
