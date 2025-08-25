@@ -8,8 +8,8 @@
 
 // Checks if the URL is valid.
 static bool isValidUrl (const std::string& url) {
-    CURLU* handle = curl_url();
-    CURLUcode rc = curl_url_set(handle, CURLUPART_URL, url.c_str(), 0);
+    CURLU* handle {curl_url()};
+    CURLUcode rc {curl_url_set(handle, CURLUPART_URL, url.c_str(), 0)};
     curl_url_cleanup(handle);
     return rc == CURLUE_OK;
 }
@@ -20,19 +20,20 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::string url {argv[0]};
-
-    if (!isValidUrl(url)) {
-        std::cerr << "URL is invalid.\n";
-        return 1;
-    }
+    std::string url {argv[1]};
 
     if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
         std::cerr << "Global initializing failed." << "\n";
         return 1;
     }
 
+    if (!isValidUrl(url)) {
+        std::cerr << "URL is invalid.\n";
+        return 1;
+    }
+
     HttpResult result;
+    HttpResult robots;
     std::string error;
 
     if (getHttp(url, result, error)) {
@@ -46,7 +47,12 @@ int main(int argc, char* argv[]) {
         std::string title = extractTitle(result.body);
         std::cout << "Extracted title: " << title << "\n";
         std::string body = result.body;
-        std::cout << "Body:" << body << "\n";     
+        std::cout << "Body:" << body << "\n"; 
+        
+        if (getRobots(url, robots, error)){   
+            std::cout << "Robots.txt: " << robots.body;
+        }
+        
     } else {
         std::cerr << "Request failed: " << error << "\n";
         curl_global_cleanup();
