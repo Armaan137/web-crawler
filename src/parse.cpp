@@ -35,7 +35,8 @@ static void collectLinksDfs(lxb_dom_node_t* node, std::vector<std::string>& link
 }
 
 // This returns the links of the HTML into a vector.
-std::vector<std::string> extractLinks(const std::string& html, std::vector<std::string> links) {
+std::vector<std::string> extractLinks(const std::string& html) {
+    std::vector<std::string> links;
 
     // Lexbor does not rely on a null terminator. It treats HTML as a raw buffer of bytes. 
     lxb_html_document_t* document = lxb_html_document_create();
@@ -60,11 +61,12 @@ std::vector<std::string> extractLinks(const std::string& html, std::vector<std::
         auto* bodyElement = lxb_dom_interface_element(document->body);
         start = lxb_dom_interface_node(bodyElement);
     } else {
-        start = lxb_dom_node_first_child(lxb_dom_interface_node(document));
+        auto* node = lxb_dom_interface_node(lxb_dom_interface_document(document));
+        start = lxb_dom_node_first_child(node);
     }
 
     // Only do a traversal if we have a place to start from.
-    if (start) collectLinksDfs(lxb_dom_node_first_child(start), links);
+    if (start) collectLinksDfs(start, links);
 
     lxb_html_document_destroy(document);
 
