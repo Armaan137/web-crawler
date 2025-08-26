@@ -1,10 +1,16 @@
 #include "parse.hpp"
 
 #include <iostream>
-#include <lexbor/dom/dom.h>
-#include <lexbor/html/html.h>
 
-// This will eventually parse the HTML fully.
+extern "C" {
+#include <lexbor/html/parser.h>
+#include <lexbor/dom/interfaces/element.h>
+#include <lexbor/dom/interfaces/attr.h>
+#include <lexbor/html/html.h>
+#include <lexbor/dom/interfaces/node.h>
+}
+
+// Extracts titles.
 std::string extractTitle(const std::string& html) {
 
     std::string openingTag = "<title>";
@@ -23,29 +29,44 @@ std::string extractTitle(const std::string& html) {
     return html.substr(start, end - start);
 }
 
-// This returns the links of the HTML into a vector.
-std::vector<std::string> extractLinks(const std::string& html) {
-    lxb_status_t status;
-    lxb_dom_element_t *element;
-    lxb_html_document_t *document;
-    lxb_dom_collection_t *collection;
+// Performs a DFS to extract links into a vector.
+static void collectLinksDfs(lxb_dom_node_t* node, std::vector<std::string>& links) {
 
-    // Lexbor does not rely on a null terminator. It treats HTML as a raw buffer of bytes.
-    size_t htmlLength = html.size(); 
-    document = lxb_html_document_create();
+}
+
+// This returns the links of the HTML into a vector.
+std::vector<std::string> extractLinks(const std::string& html, std::vector<std::string> links) {
+
+    // Lexbor does not rely on a null terminator. It treats HTML as a raw buffer of bytes. 
+    lxb_html_document_t* document = lxb_html_document_create();
+    size_t htmlLength = html.size();
 
     if (document == nullptr) {
         std::cerr << "Failed to create HTML Document.\n";
+        return links;
     }
 
-    status = lxb_html_document_parse(document, (const lxb_char_t *)html.c_str(), htmlLength);
+    // Parse the html doc.
+    lxb_status_t status = lxb_html_document_parse(document, reinterpret_cast<const lxb_char_t*>(html.data()), htmlLength);
     if (status != LXB_STATUS_OK) {
         std::cerr << "Failed to parse HTML.\n";
+        lxb_html_document_destroy(document);
+        return links;
     }
 
-    lxb_dom_element_t *title_el = lxb_dom_interface_element(lxb_html_document_head_element(document));
+    // Traverse starting from the body if available. Otherwise, traverse from the docs root.
+    lxb_dom_node_t* start = nullptr;
+    if (document->body) {
+        auto* bodyElement = lxb_dom_interface_element(document->body);
+        start = lxb_dom_interface_node(bodyElement);
+    } else {
+        start = lxb_dom_node_first_child(lxb_dom_interface_node(document));
+    }
+
+    // Only do a traversal if we have a place to start from.
+    if (start) collectLinksDfs(lxb_dom_node_first_child(start), links);
 
     lxb_html_document_destroy(document);
 
-    return {};
+    return links;
 }
