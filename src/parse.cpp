@@ -3,11 +3,12 @@
 #include <iostream>
 
 extern "C" {
-#include <lexbor/html/parser.h>
 #include <lexbor/dom/interfaces/element.h>
 #include <lexbor/dom/interfaces/attr.h>
-#include <lexbor/html/html.h>
+#include <lexbor/dom/interfaces/document.h>
 #include <lexbor/dom/interfaces/node.h>
+#include <lexbor/html/html.h>
+#include <lexbor/html/parser.h>
 }
 
 // Extracts titles.
@@ -31,7 +32,32 @@ std::string extractTitle(const std::string& html) {
 
 // Performs a DFS to extract links into a vector.
 static void collectLinksDfs(lxb_dom_node_t* node, std::vector<std::string>& links) {
-
+    // Traverse until the current node is null; until there are no more sibling nodes.
+    for (lxb_dom_node_t* curr {node}; curr; curr = lxb_dom_node_next(curr)) {
+        if (curr->type == LXB_DOM_NODE_TYPE_ELEMENT) {
+            auto* element {lxb_dom_interface_element(curr)};
+            
+            // Check if current element is an <a>.
+            if (lxb_dom_element_tag_id(element) == LXB_TAG_A) {
+                const lxb_char_t* name {(const lxb_char_t*)"href"};
+                lxb_dom_attr_t* attribute {lxb_dom_element_attr_by_name(element, name, 4)};
+                // Check if there is an "href" attribute.
+                if (attribute) {
+                    size_t length {};
+                    const lxb_char_t* data {lxb_dom_attr_value(attribute, &length)};
+                    if (data) {
+                        links.emplace_back(reinterpret_cast<const char*>(data), length);
+                    }
+                }
+            }
+        }
+        
+        // Recursively call DFS for the children of the current node.
+        auto* child {lxb_dom_node_first_child(curr)};
+        if (child) {
+            collectLinksDfs(child, links);
+        }
+    }
 }
 
 // This returns the links of the HTML into a vector.
