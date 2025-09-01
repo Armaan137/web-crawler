@@ -1,7 +1,7 @@
 # C++ Web Crawler
 
 A lightweight, extensible web crawler written in modern C++ (C++20).  
-It fetches web pages, extracts links, and collects metadata — useful for learning systems programming, networking, and basic search engine design.
+It fetches web pages, extracts links, and collects metadata; useful for learning systems programming, networking, and search engine design.
 
 ---
 
