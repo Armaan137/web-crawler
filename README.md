@@ -30,8 +30,8 @@ cmake --build build/
 
 ## Installation and Usage
 1. Install/Build Dependencies
-`sudo apt install g++ cmake libcurl4-openssl-dev`
 ```
+sudo apt install g++ cmake libcurl4-openssl-dev
 git clone https://github.com/lexbor/lexbor.git
 cd lexbor
 cmake .
