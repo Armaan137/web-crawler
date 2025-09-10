@@ -30,6 +30,16 @@ std::string extractTitle(const std::string& html) {
     return html.substr(start, end - start);
 }
 
+// Helper for normalizing URLs.
+static bool badScheme(std::string_view url) {
+    // checks if the URL starts with a certain prefix.
+    auto starts = [&](std::string_view prefix) {
+        return url.size() >= prefix.size() && url.substr(0, prefix.size()) == prefix;
+    };
+
+    return starts("javascript:") || starts("mailto:") || starts("tel:") || starts("data");
+}
+
 // Performs a DFS to extract links into a vector.
 static void collectLinksDfs(lxb_dom_node_t* node, std::vector<std::string>& links) {
     // Traverse until the current node is null; until there are no more sibling nodes.
