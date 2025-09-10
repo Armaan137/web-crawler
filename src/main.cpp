@@ -35,6 +35,7 @@ int main(int argc, char* argv[]) {
     HttpResult result;
     HttpResult robots;
     std::string error;
+    std::vector<std::string> parsedURLS;
 
     if (getHttp(url, result, error)) {
         std::vector headers = result.headers;
@@ -45,14 +46,20 @@ int main(int argc, char* argv[]) {
         std::cout << "Final URL: " << result.url << "\n";
         // if (!saveToFile(result)) return 1;
         std::string title = extractTitle(result.body);
-        std::cout << "Extracted title: " << title << "\n";
+        parsedURLS = extractLinks(result.body);
+        // std::cout << "Extracted title: " << title << "\n";
         std::string body = result.body;
-        std::cout << "Body:" << body << "\n"; 
-        
-        if (getRobots(url, robots, error)){   
-            std::cout << "Robots.txt: " << robots.body;
+        // std::cout << "Body:" << body << "\n"; 
+
+        for (auto& url : parsedURLS) {
+            std::cout << "Parsed Url: " << url << "\n";
         }
         
+        /*
+        if (getRobots(url, robots, error)) {   
+            std::cout << "Robots.txt: " << robots.body;
+        }
+        */
     } else {
         std::cerr << "Request failed: " << error << "\n";
         curl_global_cleanup();
