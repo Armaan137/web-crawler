@@ -40,6 +40,16 @@ static bool badScheme(std::string_view url) {
     return starts("javascript:") || starts("mailto:") || starts("tel:") || starts("data");
 }
 
+// Strips the fragment off a URl if it has one.
+static std::string removeFragment(std::string url) {
+    std::size_t pos = url.find('#');
+    if (pos != std::string::npos) {
+        url.resize(pos);
+    }
+
+    return url;
+}
+
 // Performs a DFS to extract links into a vector.
 static void collectLinksDfs(lxb_dom_node_t* node, std::vector<std::string>& links) {
     // Traverse until the current node is null; until there are no more sibling nodes.
