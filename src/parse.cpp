@@ -11,43 +11,51 @@ extern "C" {
 #include <lexbor/html/parser.h>
 }
 
-// Extracts titles.
+// Extracts titles using Lexbor for proper HTML parsing.
 std::string extractTitle(const std::string& html) {
-
-    std::string openingTag = "<title>";
-    std::string closingTag = "</title>";
-    
-    size_t start = html.find(openingTag);
-    size_t end = html.find(closingTag);
-
-    if (start == std::string::npos || end == std::string::npos) {
-        std::cerr << "Could not find a title.\n";
+    // Use Lexbor to properly parse and extract title
+    lxb_html_document_t* document = lxb_html_document_create();
+    if (document == nullptr) {
         return "";
     }
-
-    start += openingTag.size();
-
-    return html.substr(start, end - start);
-}
-
-// Helper for normalizing URLs.
-static bool badScheme(std::string_view url) {
-    // checks if the URL starts with a certain prefix.
-    auto starts = [&](std::string_view prefix) {
-        return url.size() >= prefix.size() && url.substr(0, prefix.size()) == prefix;
-    };
-
-    return starts("javascript:") || starts("mailto:") || starts("tel:") || starts("data");
-}
-
-// Strips the fragment off a URl if it has one.
-static std::string removeFragment(std::string url) {
-    std::size_t pos = url.find('#');
-    if (pos != std::string::npos) {
-        url.resize(pos);
+    
+    size_t htmlLength = html.size();
+    lxb_status_t status = lxb_html_document_parse(document, 
+                                                   reinterpret_cast<const lxb_char_t*>(html.data()), 
+                                                   htmlLength);
+    
+    if (status != LXB_STATUS_OK) {
+        lxb_html_document_destroy(document);
+        return "";
     }
-
-    return url;
+    
+    // Get the title element
+    lxb_dom_element_t* titleElement = lxb_html_document_title_element(document);
+    if (titleElement == nullptr) {
+        lxb_html_document_destroy(document);
+        return "";
+    }
+    
+    // Get the text content of the title element (collects all text nodes)
+    lxb_dom_node_t* titleNode = lxb_dom_interface_node(titleElement);
+    
+    // Collect all text content from the title element
+    std::string title;
+    lxb_dom_node_t* child = lxb_dom_node_first_child(titleNode);
+    while (child != nullptr) {
+        if (child->type == LXB_DOM_NODE_TYPE_TEXT) {
+            lxb_dom_character_data_t* textData = lxb_dom_interface_character_data(child);
+            size_t textLength = 0;
+            const lxb_char_t* textContent = lxb_dom_character_data_data(textData, &textLength);
+            if (textContent && textLength > 0) {
+                title += std::string(reinterpret_cast<const char*>(textContent), textLength);
+            }
+        }
+        child = lxb_dom_node_next(child);
+    }
+    
+    lxb_html_document_destroy(document);
+    return title;
 }
 
 // Performs a DFS to extract links into a vector.
