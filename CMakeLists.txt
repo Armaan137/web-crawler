@@ -5,12 +5,15 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(CURL REQUIRED)
+find_package(Threads REQUIRED)
 
 add_executable(crawler
     src/main.cpp
     src/http_client.cpp
     src/file_utils.cpp
     src/parse.cpp
+    src/crawler.cpp
+    src/csv_writer.cpp
 )
 
 target_include_directories(crawler
@@ -21,4 +24,5 @@ target_link_libraries(crawler
     PRIVATE 
         CURL::libcurl
         lexbor
+        Threads::Threads
 )
