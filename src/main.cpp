@@ -1,72 +1,98 @@
 #include "main.hpp"
-#include "http_client.hpp"
-#include "file_utils.hpp"
-#include "parse.hpp"
+#include "crawler.hpp"
+#include "csv_writer.hpp"
 
 #include <string>
 #include <curl/curl.h>
+#include <iostream>
+#include <iomanip>
+#include <ctime>
+#include <sstream>
 
 // Checks if the URL is valid.
-static bool isValidUrl (const std::string& url) {
-    CURLU* handle {curl_url()};
-    CURLUcode rc {curl_url_set(handle, CURLUPART_URL, url.c_str(), 0)};
+static bool isValidUrl(const std::string& url) {
+    CURLU* handle = curl_url();
+    if (!handle) return false;
+    CURLUcode rc = curl_url_set(handle, CURLUPART_URL, url.c_str(), 0);
     curl_url_cleanup(handle);
     return rc == CURLUE_OK;
 }
 
+// Generate CSV filename with timestamp
+static std::string generateCsvFilename() {
+    auto now = std::time(nullptr);
+    auto* localTime = std::localtime(&now);
+    
+    std::ostringstream oss;
+    oss << "crawl_results_"
+        << std::put_time(localTime, "%Y%m%d_%H%M%S")
+        << ".csv";
+    return oss.str();
+}
+
 int main(int argc, char* argv[]) {
-    if (argc != 2) {
-        std::cerr << "Must pass in one URL.\n";
+    if (argc < 2 || argc > 3) {
+        std::cerr << "Usage: " << argv[0] << " <start_url> [max_pages]\n";
+        std::cerr << "  start_url: The starting URL to crawl\n";
+        std::cerr << "  max_pages: Maximum number of pages to crawl (default: 100)\n";
         return 1;
     }
 
-    std::string url {argv[1]};
-
-    if (curl_global_init(CURL_GLOBAL_DEFAULT) != CURLE_OK) {
-        std::cerr << "Global initializing failed." << "\n";
-        return 1;
-    }
-
-    if (!isValidUrl(url)) {
-        std::cerr << "URL is invalid.\n";
-        return 1;
-    }
-
-    HttpResult result;
-    HttpResult robots;
-    std::string error;
-    std::vector<std::string> parsedURLS;
-
-    if (getHttp(url, result, error)) {
-        std::vector headers = result.headers;
-        for (const auto& element : headers) {
-            std::cout << element;
+    std::string startUrl = argv[1];
+    size_t maxPages = 100;
+    
+    if (argc == 3) {
+        try {
+            maxPages = std::stoul(argv[2]);
+        } catch (const std::exception& e) {
+            std::cerr << "Invalid max_pages value: " << argv[2] << "\n";
+            return 1;
         }
-        std::cout << "Status: " << result.status << "\n";
-        std::cout << "Final URL: " << result.url << "\n";
-        // if (!saveToFile(result)) return 1;
-        std::string title = extractTitle(result.body);
-        parsedURLS = extractLinks(result.body);
-        // std::cout << "Extracted title: " << title << "\n";
-        std::string body = result.body;
-        // std::cout << "Body:" << body << "\n"; 
+    }
 
-        for (auto& url : parsedURLS) {
-            std::cout << "Parsed Url: " << url << "\n";
-        }
-        
-        /*
-        if (getRobots(url, robots, error)) {   
-            std::cout << "Robots.txt: " << robots.body;
-        }
-        */
-    } else {
-        std::cerr << "Request failed: " << error << "\n";
-        curl_global_cleanup();
+    if (!isValidUrl(startUrl)) {
+        std::cerr << "URL is invalid: " << startUrl << "\n";
         return 1;
     }
 
-    curl_global_cleanup();
+    const size_t numThreads = 4;
+    
+    std::cout << "Starting multithreaded web crawler...\n";
+    std::cout << "Start URL: " << startUrl << "\n";
+    std::cout << "Max pages: " << maxPages << "\n";
+    std::cout << "Threads: " << numThreads << "\n\n";
+
+    // Create crawler with specified number of threads
+    WebCrawler crawler(numThreads, maxPages);
+    
+    // Start crawling
+    crawler.start(startUrl);
+    
+    // Get results
+    auto results = crawler.getResults();
+    
+    // Generate CSV filename
+    std::string csvFilename = generateCsvFilename();
+    
+    // Write results to CSV
+    CsvWriter csvWriter(csvFilename);
+    if (!csvWriter.writeHeader()) {
+        std::cerr << "Failed to write CSV header\n";
+        return 1;
+    }
+    
+    for (const auto& result : results) {
+        if (!csvWriter.writeResult(result)) {
+            std::cerr << "Failed to write result to CSV\n";
+            return 1;
+        }
+    }
+    
+    csvWriter.flush();
+    
+    std::cout << "\nCrawling completed!\n";
+    std::cout << "Total pages crawled: " << results.size() << "\n";
+    std::cout << "Results saved to: " << csvFilename << "\n";
 
     return 0;
 }
