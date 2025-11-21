@@ -26,6 +26,6 @@ struct SlistDeleter {
 };
 
 bool getHttp(const std::string& url, HttpResult& output, std::string& error);
-bool getRobots(std::string& url, HttpResult& output, std::string& error);
+bool getRobots(const std::string& url, HttpResult& output, std::string& error);
 
 #endif

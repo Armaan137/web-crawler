@@ -59,8 +59,8 @@ static std::optional<std::string> buildRobotsUrl(const std::string&url) {
 
 }
 
-// Uses getHttp to get the robot.txt if there is one.
-bool getRobots(std::string& url, HttpResult& output, std::string& error) {
+// Uses getHttp to get the robots.txt if there is one.
+bool getRobots(const std::string& url, HttpResult& output, std::string& error) {
     auto robotsUrl {buildRobotsUrl(url)};
     if (!robotsUrl) {
         error = "Failed to construct URL for robots.txt.";
