@@ -38,11 +38,6 @@ It efficiently crawls websites, extracts links, collects metadata, and saves res
 sudo apt install g++ cmake libcurl4-openssl-dev
 ```
 
-**On macOS:**
-```bash
-brew install cmake curl
-```
-
 ### 2. Build Lexbor
 
 ```bash
